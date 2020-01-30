@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'dart:async';
+import 'dart:convert';
 
 void main() => runApp(RootWidget());
 
@@ -10,15 +12,6 @@ class RootWidget extends StatelessWidget {
     return MaterialApp(
       title: 'Qiita App',
       theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // Try running your application with "flutter run". You'll see the
-        // application has a blue toolbar. Then, without quitting the app, try
-        // changing the primarySwatch below to Colors.green and then invoke
-        // "hot reload" (press "r" in the console where you ran "flutter run",
-        // or simply save your changes to "hot reload" in a Flutter IDE).
-        // Notice that the counter didn't reset back to zero; the application
-        // is not restarted.
         primarySwatch: Colors.green,
       ),
       home: HomeWidget(),
@@ -34,7 +27,22 @@ class HomeWidget extends StatefulWidget {
 }
 
 class ListState extends State<HomeWidget> {
-  var listItem = ['a1','a2','a3','a4','a5','a6','a7','a8','a9','a10','a11','a12'];
+  List listItem;
+
+  Future getData() async{
+    http.Response response = await http.get("https://qiita.com/api/v2/items?page=1&per_page=20&query=flutter");
+
+    this.setState((){
+      listItem = json.decode(response.body);
+    });
+
+    print(listItem[1]);
+  }
+  @override
+  void initState() {
+    super.initState();
+    this.getData();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,8 +56,7 @@ class ListState extends State<HomeWidget> {
                 ),
               ),
               child: ListTile(
-                title: Text('$index'),
-                subtitle: Text(listItem[index]),
+                title: Text(listItem[index]["title"]),
                 onTap: () {
 
                 }
@@ -59,4 +66,3 @@ class ListState extends State<HomeWidget> {
     );
   }
 }
-
