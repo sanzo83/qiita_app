@@ -35,8 +35,6 @@ class ListState extends State<HomeWidget> {
     this.setState((){
       listItem = json.decode(response.body);
     });
-
-    print(listItem[1]);
   }
   @override
   void initState() {
@@ -61,7 +59,7 @@ class ListState extends State<HomeWidget> {
 
                 }
             ));},
-          itemCount: listItem.length,
+          itemCount: listItem == null ? 0: listItem.length,
       ),
     );
   }
