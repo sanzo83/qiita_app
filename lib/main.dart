@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
+import 'item.dart';
 
 void main() => runApp(RootWidget());
 
@@ -54,7 +55,6 @@ class ListState extends State<HomeWidget> {
   }
 
   Future _onRefresh() async{
-    print('refresh');
     this.page = "1";
     this.isAdd = false;
     this.getData(this.query);
@@ -126,14 +126,16 @@ class ListState extends State<HomeWidget> {
                                 child: ListTile(
                                     title: Text(listItem[index]["title"]),
                                     onTap: () {
-
+                                      Navigator.push(context, new MaterialPageRoute<Null>(
+                                          settings: const RouteSettings(name: "/item"),
+                                          builder: (BuildContext context) => ItemWidget(title: listItem[index]["title"], url: listItem[index]["url"])
+                                      ));
                                     }
                                 ));},
                           itemCount: listItem == null ? 0: listItem.length,
                         ),
                         onNotification: (ScrollNotification value){
                           if (value.metrics.extentAfter == 0.0) {
-                            print('ScrollEnd');
                             this.nextPage();
                           }
                             return false;
