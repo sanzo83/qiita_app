@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:async';
 import 'dart:convert';
 import 'item.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 void main() => runApp(RootWidget());
 
@@ -45,10 +46,21 @@ class ListState extends State<HomeWidget> {
     http.Response response = await http.get("https://qiita.com/api/v2/items?page=" + this.page + "&per_page=30&query=" + query);
 
     this.setState((){
-      if (this.isAdd) {
-        listItem.insertAll(listItem == null ? 0: listItem.length, json.decode(response.body));
+      var body = json.decode(response.body);
+      // リクエスト成功時配列でレスポンスがくるため
+      if (body is List) {
+        // 次の記事リストを読み込む動作の時のみlistItemを更新でなく追加にしている
+        if (this.isAdd) {
+          listItem.insertAll(listItem == null ? 0: listItem.length, body);
+        } else {
+          listItem = json.decode(response.body);
+        }
       } else {
-        listItem = json.decode(response.body);
+        // APIリクエスト上限がくるとbad requestが返ってくるのでトーストでアラート
+        Fluttertoast.showToast(
+            msg: "APIリクエストエラー",
+            backgroundColor: Colors.red,
+        );
       }
       this.isLoading = false;
     });
@@ -84,14 +96,6 @@ class ListState extends State<HomeWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (this.isLoading) {
-      return Scaffold(
-        appBar: AppBar(title: Text("Loading..."),),
-        body: Center(
-          child: CircularProgressIndicator()
-        )
-      );
-    }
     return Scaffold(
       appBar: AppBar(title: Text('Qiita App'),),
       body: Container(
@@ -138,7 +142,7 @@ class ListState extends State<HomeWidget> {
                           if (value.metrics.extentAfter == 0.0) {
                             this.nextPage();
                           }
-                            return false;
+                          return false;
                         },
                     ),
                     onRefresh: _onRefresh
